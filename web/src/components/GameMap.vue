@@ -13,9 +13,9 @@
         setup() {
             let parent = ref(null);
             let canvas = ref(null);
-            onMounted(() => {
-                new GameMap(canvas.value.getContext('2d'), parent.value);// mdn => canvas
-            });
+            onMounted(() => {// 匿名函数的优点: this 不会被重新绑定
+            new GameMap(canvas.value.getContext('2d'), parent.value);// mdn => canvas
+        });
             return {
                 parent,
                 canvas,
@@ -30,6 +30,7 @@
         width: 100%;
         height: 100%;
         display: flex;
+        /* background-color: #fff; */
         /* 水平居中 */
         justify-content: center;
         /* 竖直居中 */

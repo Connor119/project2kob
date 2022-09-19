@@ -25,11 +25,23 @@ export class GameMap extends AcGameObject {
 
     update() {
         this.update_size();
+        this.render();
 
     }
 
     render() {
-        this.ctx.fillStyle = 'green';
-        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height); //(0, 0): 起点坐标
+        const color_even = "#AAD751",
+            color_odd = "#A2D149";
+        for (let r = 0; r < this.rows; r++) { // canvas坐标系: 横着为 x, 竖着的为 y 
+            for (let c = 0; c < this.cols; c++) {
+                if ((r + c) % 2 == 0) {
+                    this.ctx.fillStyle = color_even
+                } else {
+                    this.ctx.fillStyle = color_odd
+                }
+                this.ctx.fillRect(c * this.L, r * this.L, this.L, this.L); // 前两个为起点坐标，后两个为边长
+
+            }
+        }
     }
 }

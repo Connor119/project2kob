@@ -21,7 +21,7 @@ export default {
     /* vw: 浏览器宽度，vh: 浏览器高度 */
     width: 60vw;
     height: 70vh;
-    background: lightblue;
+    background: rgb(154, 217, 236);
     margin: 40px auto;
 }
 </style>
