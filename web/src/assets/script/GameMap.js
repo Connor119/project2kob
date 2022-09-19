@@ -12,12 +12,32 @@ export class GameMap extends AcGameObject {
         this.rows = 13;
         this.cols = 13;
         this.walls = [];
+        this.inner_walls_count = 80;
     }
 
     start() {
-        this.create_walls();
-
+        for (let i = 0; i < 1000; i++) {
+            if (this.create_walls()) {
+                break;
+            }
+        }
     }
+
+    check_connectivity(g, sx, sy, tx, ty) { // source, target
+        if (sx == tx && sy == ty) return true;
+        g[sx][sy] = true;
+
+        let dx = [-1, 0, 1, 0],
+            dy = [0, 1, 0, -1];
+        for (let i = 0; i < 4; i++) {
+            let x = sx + dx[i],
+                y = sy + dy[i];
+            if (!g[x][y] && this.check_connectivity(g, x, y, tx, ty))
+                return true;
+        }
+        return false;
+    }
+
     create_walls() {
         const g = []; //初始化二维数组
         for (let r = 0; r < this.rows; r++) {
@@ -34,7 +54,23 @@ export class GameMap extends AcGameObject {
         for (let c = 0; c < this.cols; c++) { //上下两条横边
             g[0][c] = g[this.rows - 1][c] = true;
         }
+        // 加随机障碍物
+        for (let i = 0; i < this.inner_walls_count / 2; i++) {
+            for (let j = 0; j < 1000; j++) { //随机1000次
+                let r = parseInt(Math.random() * this.rows);
+                let c = parseInt(Math.random() * this.cols);
+                if (g[r][c] || g[c][r]) continue;
+                if (r == this.rows - 2 && c == 1) continue;
+                if (r == 1 && c == this.cols - 2) continue;
+                g[r][c] = g[c][r] = true;
+                break;
+            }
+        }
 
+        const copy_g = JSON.parse(JSON.stringify(g));
+        if (!this.check_connectivity(copy_g, this.rows - 2, 1, 1, this.cols - 2)) {
+            return false;
+        }
         for (let r = 0; r < this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 if (g[r][c]) {
@@ -42,6 +78,9 @@ export class GameMap extends AcGameObject {
                 }
             }
         }
+
+
+        return true;
     }
     update_size() {
         this.L = parseInt(Math.min(this.parent.clientWidth / this.cols, this.parent.clientHeight / this.rows))
