@@ -1,35 +1,20 @@
 <template>
-  <div>
-    hello,World
-    <div>从后端搞来的数据: {{ data1 }}</div>
-  </div>
-  <router-view/>
+  <NavBar></NavBar>
+  <router-view></router-view>
 </template>
 
 
 <script>
-import $ from 'jquery';
-import { ref } from 'vue';
+// import $ from 'jquery';
+// import { ref } from 'vue';
+import NavBar from './components/NavBar.vue'
+import "bootstrap/dist/css/bootstrap.min.css"
+import "bootstrap/dist/js/bootstrap"
 
 export default {
   name: "APP",
-  setup: ()=>{
-      let data1 = ref("");
-
-      $.ajax({
-        url: "http://127.0.0.1:3000/pk/getBotInfoList",
-        type: "get",
-        success: resp => {
-          console.log("1111");
-          console.log(resp);
-          data1.value = resp[0];
-        }
-      });
-
-
-      return {
-        data1
-      }
+  components: {
+    NavBar,
   }
 }
 </script>
@@ -37,7 +22,7 @@ export default {
 
 <style>
 body {
-  background-image: url("@/assets/20.png");
+  background-image: url("@/assets/images/20.png");
   background-size: cover;
 }
 </style>
