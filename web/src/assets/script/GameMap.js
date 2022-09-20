@@ -32,6 +32,23 @@ export class GameMap extends AcGameObject {
         this.add_listening_events();
     }
 
+    check_valid(cell) { // 检测目标位置逻辑是否合法: 没有撞到蛇身或者障碍物
+        for (const wall of this.walls) {
+            if (wall.c === cell.c && wall.r === cell.r)
+                return false;
+        }
+        for (const snake of this.snakes) { // 需要判断蛇尾是不是会缩，如果缩的话，蛇可以继续走
+            let k = snake.cells.length;
+            if (snake.check_tail_increasing()) { // 蛇尾会前进的时候，不判断蛇尾
+                k--;
+            }
+            for (let i = 0; i < k; i++) { // 判定是否完全重合(撞上的话)
+                if (snake.cells[i].r === cell.r && snake.cells[i].c === cell.c)
+                    return false;
+            }
+        }
+        return true;
+    }
 
     add_listening_events() {
         this.ctx.canvas.focus(); //聚焦
@@ -158,7 +175,6 @@ export class GameMap extends AcGameObject {
                     this.ctx.fillStyle = color_odd
                 }
                 this.ctx.fillRect(c * this.L, r * this.L, this.L, this.L); // 前两个为起点坐标，后两个为边长
-
             }
         }
     }

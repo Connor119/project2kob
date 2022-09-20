@@ -22,6 +22,24 @@ export class Snake extends AcGameObject {
 
         this.step = 0;
         this.eps = 1e-2; //距离误差，距离小于这个值即可认为两点重合
+
+        this.eye_direction = 0; // 第一条蛇默认向上
+        if (this.id === 1) this.eye_direction = 2; // 第二条蛇默认向下
+
+        this.eye_dx = [
+            [-1, 1],
+            [1, 1],
+            [1, -1],
+            [-1, -1],
+        ]; // 蛇眼睛的偏移量
+        this.eye_dy = [
+            [-1, -1],
+            [-1, 1],
+            [1, 1],
+            [1, -1],
+        ];
+
+
     }
 
     start() {
@@ -41,6 +59,9 @@ export class Snake extends AcGameObject {
         const d = this.direction;
         this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
         this.direction = -1; // 清空方向
+
+        this.eye_direction = d;
+
         this.status = "move";
         this.step++;
 
@@ -48,6 +69,10 @@ export class Snake extends AcGameObject {
         const k = this.cells.length;
         for (let i = k; i > 0; i--) {
             this.cells[i] = JSON.parse(JSON.stringify(this.cells[i - 1])); // 必须深层复制
+        }
+
+        if (!this.gamemap.check_valid(this.next_cell)) { // 若下一步操作非法，则蛇死亡
+            this.status = "die";
         }
     }
 
@@ -93,6 +118,12 @@ export class Snake extends AcGameObject {
         const ctx = this.gamemap.ctx;
 
         ctx.fillStyle = this.color;
+
+        if (this.status === 'die') {
+            ctx.fillStyle = "white";
+        }
+
+
         for (const cell of this.cells) {
             ctx.beginPath(); // 画圆
             ctx.arc(cell.x * L, cell.y * L, L / 2 * 0.8, 0, Math.PI * 2); // (x, y)坐标，半径，起始角度和终止角度
@@ -109,5 +140,16 @@ export class Snake extends AcGameObject {
                 ctx.fillRect(Math.min(a.x, b.x) * L, (a.y - 0.4) * L, Math.abs(a.x - b.x) * L, L * 0.8);
             }
         }
+
+        ctx.fillStyle = "black";
+        for (let i = 0; i < 2; i++) { // i 枚举的是左眼和右眼
+            const eye_x = (this.cells[0].x + this.eye_dx[this.eye_direction][i] * 0.15) * L;
+            const eye_y = (this.cells[0].y + this.eye_dy[this.eye_direction][i] * 0.15) * L;
+            ctx.beginPath();
+            ctx.arc(eye_x, eye_y, L * 0.05, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+
     }
 }
