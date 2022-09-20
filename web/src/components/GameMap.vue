@@ -1,7 +1,7 @@
 <!-- 在playGround区域搞一个地图出来 -->
 <template>
     <div ref="parent" class="gamemap">
-        <canvas ref="canvas"></canvas>
+        <canvas ref="canvas" tabindex="0"></canvas>
     </div>
 </template>
 
