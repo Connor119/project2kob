@@ -31,6 +31,12 @@ export class Snake extends AcGameObject {
         this.direction = d;
     }
 
+    check_tail_increasing() { // 检测当前回合蛇的长度是否要增加 => 蛇尾要变长,则蛇尾不动即可。如果不变长，需要跟着蛇头动
+        if (this.step <= 10) return true;
+        if (this.step % 3 === 1) return true;
+        return false;
+    }
+
     next_step() { // 将蛇的状态变为走下一步
         const d = this.direction;
         this.next_cell = new Cell(this.cells[0].r + this.dr[d], this.cells[0].c + this.dc[d]);
@@ -54,10 +60,25 @@ export class Snake extends AcGameObject {
             this.cells[0] = this.next_cell; // 添加一个新蛇头
             this.next_cell = null;
             this.status = "idle"; // 走完了
+
+            // 判断一下蛇没有超过10的长度就砍掉蛇尾
+            if (!this.check_tail_increasing()) {
+                this.cells.pop();
+            }
         } else {
             const move_distance = this.speed * this.timedelta / 1000; // 每帧走过的距离
             this.cells[0].x += move_distance * dx / distance;
             this.cells[0].y += move_distance * dy / distance;
+            // 蛇尾移动
+            if (!this.check_tail_increasing()) {
+                const k = this.cells.length;
+                const tail = this.cells[k - 1],
+                    tail_target = this.cells[k - 2];
+                const tail_dx = tail_target.x - tail.x;
+                const tail_dy = tail_target.y - tail.y;
+                tail.x += move_distance * tail_dx / distance;
+                tail.y += move_distance * tail_dy / distance;
+            }
         }
     }
 
@@ -77,5 +98,7 @@ export class Snake extends AcGameObject {
             ctx.arc(cell.x * L, cell.y * L, L / 2, 0, Math.PI * 2); // (x, y)坐标，半径，起始角度和终止角度
             ctx.fill();
         }
+
+
     }
 }
