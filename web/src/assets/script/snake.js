@@ -95,10 +95,19 @@ export class Snake extends AcGameObject {
         ctx.fillStyle = this.color;
         for (const cell of this.cells) {
             ctx.beginPath(); // 画圆
-            ctx.arc(cell.x * L, cell.y * L, L / 2, 0, Math.PI * 2); // (x, y)坐标，半径，起始角度和终止角度
+            ctx.arc(cell.x * L, cell.y * L, L / 2 * 0.8, 0, Math.PI * 2); // (x, y)坐标，半径，起始角度和终止角度
             ctx.fill();
         }
 
-
+        for (let i = 1; i < this.cells.length; i++) { // 优化蛇的形状, 相邻两个球之间画一个矩形
+            const a = this.cells[i - 1],
+                b = this.cells[i];
+            if (Math.abs(a.x - b.x) < this.eps && Math.abs(a.y - b.y) < this.eps) continue;
+            if (Math.abs(a.x - b.x) < this.eps) { // 竖方向相邻的情况
+                ctx.fillRect((a.x - 0.4) * L, Math.min(a.y, b.y) * L, L * 0.8, Math.abs(a.y - b.y) * L);
+            } else {
+                ctx.fillRect(Math.min(a.x, b.x) * L, (a.y - 0.4) * L, Math.abs(a.x - b.x) * L, L * 0.8);
+            }
+        }
     }
 }
