@@ -27,6 +27,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if(user == null){
             throw new RuntimeException("用户不存在");
         }
+//        这个函数只管拿到user，而判断用户名密码是否匹配的逻辑是再LoinServiceImpl中去写的，而那个类中使用AuthenticationManager进行判断
         return new UserDetailsImpl(user);
     }
 }

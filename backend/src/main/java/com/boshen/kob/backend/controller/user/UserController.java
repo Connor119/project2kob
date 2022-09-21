@@ -36,7 +36,7 @@ public class UserController {
     public String addUser(@PathVariable int userId,@PathVariable String username,@PathVariable String password){
         PasswordEncoder pe = new BCryptPasswordEncoder();
         String encodedPassWord = pe.encode(password);
-        User u = new User(userId,username,encodedPassWord);
+        User u = new User(userId,username,encodedPassWord,null);
         userMappper.insert(u);
         return "Add User Successfully";
     }
