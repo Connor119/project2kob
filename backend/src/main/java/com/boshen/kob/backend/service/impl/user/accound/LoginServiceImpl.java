@@ -8,12 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
 //这个服务的逻辑就是验证用户是否合法（使用authenticationManager.authenticate来验证，当这个东西合法的话，就会返回一个实例化对象）
 //接收这个实例化对象并使用getPrincipal方法拿到我们的用户，用户的类就是之前定义的UserDetails
+@Service
 public class LoginServiceImpl implements LoginService {
 
 //用来判断用户是否已经登录了（判断用户名密码是否匹配，使用controller传递过来的用户名和密码，之后使用UserDetailsService的获取User的方法将其获得，之后再authenticate中进行逻辑判断和比较）
@@ -22,7 +24,7 @@ public class LoginServiceImpl implements LoginService {
 
 
     @Override
-    public Map<String, String> login(String username, String password) {
+    public Map<String, String> getToken(String username, String password) {
 //        封装用户名密码(authenticate只能接收这个东西需要将其封装一下)
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(username, password);
 //        需要传入用户名和密码（将controller接口传递过来的东西放进去就可以实现自动校验用户是否可以登录了）
