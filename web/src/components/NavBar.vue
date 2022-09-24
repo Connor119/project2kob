@@ -20,18 +20,30 @@
         </li>
       </ul>
       
-      <ul class="navbar-nav">
+      <ul class="navbar-nav" v-if="$store.state.user.is_login">
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" id="navbarDropdown" data-bs-toggle="dropdown" >
-            boshen
+            {{ $store.state.user.username }}
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><router-link class="route_name == 'user_bot_index' ? 'nav-link active' : 'nav-link'" :to="{name: 'user_bot_index'}">我的bot</router-link></li>
+            <li><router-link class="dropdown-item" :to="{name: 'user_bot_index'}">我的bot</router-link></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">退出</a></li>
+            <li><a class="dropdown-item" href="#" @click="logout">Exit</a></li>
           </ul>
         </li>
       </ul>
+      <ul class="navbar-nav" v-else>
+          <li class="nav-item">
+            <router-link class="nav-link" :to="{ name: 'user_account_login' }" role="button" aria-expanded="false">
+              Log in
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link" :to="{ name: 'user_account_register' }" role="button" aria-expanded="false">
+              Sign up
+            </router-link>
+          </li>
+        </ul>
     </div>
   </div>
 </nav>
@@ -41,13 +53,21 @@
 <script>
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import { useStore } from 'vuex'
+
 export default {
     setup(){
-        const route = useRoute();
-        let route_name = computed(() => route.name)
-        return{
-            route_name
-        }
+      const store = useStore();
+      const route = useRoute();
+      let route_name = computed(() => route.name)
+      const logout = () => {
+        store.dispatch("logout");
+      }
+      return{
+          route_name,
+          logout
+      }
+
     }
 }
 </script>
