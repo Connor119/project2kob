@@ -1,4 +1,6 @@
 import $ from 'jquery'
+import router from '../router/index'
+
 
 const ModuleUser = {
     state: {
@@ -39,6 +41,7 @@ const ModuleUser = {
                 },
                 success(resp) {
                     if (resp.error_message === "success") {
+                        localStorage.setItem("jwt-token", resp.token);
                         context.commit("updateToken", resp.token);
                         data.success(resp);
                     } else {
@@ -76,6 +79,8 @@ const ModuleUser = {
             });
         },
         logout(context) {
+            localStorage.removeItem("jwt-token");
+            router.push({ name: "user_account_login" })
             context.commit("logout");
         }
     },
