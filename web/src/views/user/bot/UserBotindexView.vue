@@ -60,15 +60,8 @@ export default {
 
       $.ajax({
             // url: "http://127.0.0.1:3000/user/bot/remove/",
-            url: "http://127.0.0.1:3000/user/bot/update/",
-            type: "POST",
-            data: {
-                // bot_id: 1,
-                bot_id: 2,
-                title: "My Bot2 update",
-                description: "description update",
-                content: "Bot Code2 update",
-            },
+            url: "http://127.0.0.1:3000/user/bot/getlist/",
+            type: "GET",
             headers: {
                 Authorization: "Bearer " + store.state.user.token,
             },
