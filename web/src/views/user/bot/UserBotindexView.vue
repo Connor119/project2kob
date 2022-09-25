@@ -37,15 +37,37 @@ export default {
       //   });
       // }
 
+      // $.ajax({
+      //       // url: "http://127.0.0.1:3000/user/bot/add/",
+      //       url: "http://127.0.0.1:3000/user/bot/remove/",
+      //       type: "POST",
+      //       data: {
+      //           // title: "My Bot1",
+      //           // description: null,
+      //           // content: "Bot Code",
+      //           bot_id: 3,
+      //       },
+      //       headers: {
+      //           Authorization: "Bearer " + store.state.user.token,
+      //       },
+      //       success(resp) {
+      //           console.log(resp);
+      //       },
+      //       error(resp) {
+      //           console.log(resp);
+      //       }
+      //   });
+
       $.ajax({
-            // url: "http://127.0.0.1:3000/user/bot/add/",
-            url: "http://127.0.0.1:3000/user/bot/remove/",
+            // url: "http://127.0.0.1:3000/user/bot/remove/",
+            url: "http://127.0.0.1:3000/user/bot/update/",
             type: "POST",
             data: {
-                // title: "My Bot1",
-                // description: null,
-                // content: "Bot Code",
-                bot_id: 3,
+                // bot_id: 1,
+                bot_id: 2,
+                title: "My Bot2 update",
+                description: "description update",
+                content: "Bot Code2 update",
             },
             headers: {
                 Authorization: "Bearer " + store.state.user.token,
