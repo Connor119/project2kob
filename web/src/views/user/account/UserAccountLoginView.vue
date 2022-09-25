@@ -44,14 +44,14 @@ export default {
             store.dispatch("getinfo", {
                 success() {
                     router.push({ name: "home" });
-                    store.commit("updatePullingInfo", false);
+                    // store.commit("updatePullingInfo", false);
                 },
                 error() {
-                    store.commit("updatePullingInfo", false);
+                    // store.commit("updatePullingInfo", false);
                 }
             });
         } else {
-            store.commit("updatePullingInfo", false);
+            // store.commit("updatePullingInfo", false);
         }
 
 
