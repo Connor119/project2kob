@@ -36,9 +36,9 @@
                                                 placeholder="Please enter the bot description"></textarea>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="add-bot-code" class="form-label">Code</label>
-                                            <textarea v-model="botadd.content" class="form-control" id="add-bot-code"
-                                                rows="7" placeholder="Please write the bot code"></textarea>
+                                            <label for="add-bot-description" class="form-label">Code</label>
+                                            <VAceEditor v-model:value="botadd.content" @init="editorInit" lang="c_cpp"
+                                                theme="textmate" style="height: 300px" />
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -95,10 +95,10 @@
                                                                 placeholder="Please enter the bot description"></textarea>
                                                         </div>
                                                         <div class="mb-3">
-                                                            <label for="add-bot-code" class="form-label">Code</label>
-                                                            <textarea v-model="bot.content" class="form-control"
-                                                                id="add-bot-code" rows="7"
-                                                                placeholder="Please write the bot code"></textarea>
+                                                            <label for="add-bot-description"
+                                                                class="form-label">Code</label>
+                                                            <VAceEditor v-model:value="bot.content" @init="editorInit"
+                                                                lang="c_cpp" theme="textmate" style="height: 300px" />
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
@@ -126,8 +126,20 @@ import { ref, reactive } from 'vue'
 import { useStore } from 'vuex'
 import $ from 'jquery'
 import { Modal } from 'bootstrap/dist/js/bootstrap'
+import { VAceEditor } from 'vue3-ace-editor';
+import ace from 'ace-builds';
+
+
 export default {
+    components: {
+        VAceEditor,
+    },
     setup() {
+        ace.config.set(
+            "basePath",
+            "https://cdn.jsdelivr.net/npm/ace-builds@" + require('ace-builds').version + "/src-noconflict/")
+
+
         const store = useStore();
         let bots = ref([]);
         const botadd = reactive({
