@@ -11,8 +11,8 @@ const ModulePk = {
             state.socket = socket;
         },
         updateOpponent(state, opponent) {
-            state.opponent.opponent_username = opponent.opponent_username;
-            state.opponent.opponent_photo = opponent.opponent_photo;
+            state.opponent_username = opponent.opponent_username;
+            state.opponent_photo = opponent.opponent_photo;
         },
         updateStatus(state, status) {
             state.status = status;
