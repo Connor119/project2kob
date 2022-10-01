@@ -84,14 +84,24 @@ public class WebSocketServer {
             matchpool.remove(b);
 
 //临时创建一个地图用于测试
-            Game game = new Game(13,14,20);
+            Game game = new Game(13,14,20,a.getId(),b.getId());
             game.createMap();
+
+//生成一个json，这个json包含所有的地图信息和玩家的位置信息，之后将这个信息放入我们后面的两个json中
+            JSONObject respGame = new JSONObject();
+            respGame.put("a_id",game.getPlayerA().getId());
+            respGame.put("a_sx",game.getPlayerA().getSx());
+            respGame.put("a_sy",game.getPlayerA().getSy());
+            respGame.put("b_id",game.getPlayerB().getId());
+            respGame.put("b_sx",game.getPlayerB().getSx());
+            respGame.put("b_sy",game.getPlayerB().getSy());
+            respGame.put("map",game.getG());
 
             JSONObject respA = new JSONObject();
             respA.put("event", "start-matching");
             respA.put("opponent_username", b.getUsername());
             respA.put("opponent_photo", b.getPhoto());
-            respA.put("gamemap",game.getG());
+            respA.put("game",respGame);
 //            这里的含义是将匹配成功的消息发送给前端
             users.get(a.getId()).sendMessage(respA.toJSONString());
 
@@ -100,7 +110,7 @@ public class WebSocketServer {
             respB.put("event", "start-matching");
             respB.put("opponent_username", a.getUsername());
             respB.put("opponent_photo", a.getPhoto());
-            respB.put("gamemap",game.getG());
+            respB.put("game",respGame);
 //            同上（给b发送消息）
             users.get(b.getId()).sendMessage(respB.toJSONString());
         }

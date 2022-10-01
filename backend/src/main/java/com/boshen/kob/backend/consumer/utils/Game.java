@@ -1,5 +1,6 @@
 package com.boshen.kob.backend.consumer.utils;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 //由于现在地图的功能是在前端实现的，所以当用户开始匹配的时候地图并不是同步的
@@ -11,12 +12,28 @@ public class Game {
     final private int[][] g;
     final private static int[] dx = {-1, 0, 1, 0};
     final private static int[] dy = {0, 1, 0, -1};
+//    存储每名玩家
+    final private  Player playerA,playerB;
 
-    public Game(Integer rows, Integer cols, Integer inner_walls_count) {
+//创建地图的时候我们需要的信息有，一个二维数组的空白地图和玩家信息
+    public Game(Integer rows, Integer cols, Integer inner_walls_count, Integer idA, Integer idB) {
         this.rows = rows;
         this.cols = cols;
         this.inner_walls_count = inner_walls_count;
         this.g = new int[rows][cols];
+        playerA = new Player(idA,rows-2,1,new ArrayList<>());
+        playerB = new Player(idA,1,cols-2,new ArrayList<>());
+
+
+
+    }
+
+    public Player getPlayerA() {
+        return playerA;
+    }
+
+    public Player getPlayerB() {
+        return playerB;
     }
 
     public int[][] getG() {
