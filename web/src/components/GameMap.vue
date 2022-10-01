@@ -9,12 +9,15 @@
 <script>
     import { GameMap } from "@/assets/script/GameMap";
     import { ref, onMounted } from 'vue';//onMounted: 组件挂载完需要执行的操作
+    import { useStore } from 'vuex'
     export default {
         setup() {
             let parent = ref(null);
             let canvas = ref(null);
+            const store = useStore();
             onMounted(() => {// 匿名函数的优点: this 不会被重新绑定
-            new GameMap(canvas.value.getContext('2d'), parent.value);// mdn => canvas
+            // new GameMap(canvas.value.getContext('2d'), parent.value);// mdn => canvas
+            new GameMap(canvas.value.getContext('2d'), parent.value, store);
         });
             return {
                 parent,

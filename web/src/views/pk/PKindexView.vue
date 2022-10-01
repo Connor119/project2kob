@@ -1,7 +1,8 @@
 <template>
-    <PlayGround v-if="$store.state.pk.status === 'playing'"></PlayGround>
+    <playGround v-if="$store.state.pk.status === 'playing'"></playGround>
     <MatchGround v-if="$store.state.pk.status === 'matching'"></MatchGround>
 </template>
+
 
 <script>
 import playGround from "../../components/PlayGround.vue"
@@ -26,11 +27,21 @@ export default {
             socket = new WebSocket(socketUrl);
             socket.onopen = () => {
                 console.log("connected");
+                store.commit("updateSocket", socket);
             }
             socket.onmessage = (msg) => {
                 // Spring定义的传递回来的格式
                 const data = JSON.parse(msg.data);
-                console.log(data);
+                if (data.event === "start-matching") { // 表示匹配成功
+                    store.commit("updateOpponent", {
+                        opponent_username: data.opponent_username,
+                        opponent_photo: data.opponent_photo,
+                    });
+                    setTimeout(() => {// 延迟，以看见对手信息
+                        store.commit("updateStatus", "playing");
+                    }, 2000);
+                    store.commit("updateGamemap", data.gamemap);
+                }
             }
             socket.onclose = () => {
                 console.log("disconnected");
@@ -38,6 +49,7 @@ export default {
         });
         onUnmounted(() => {
             socket.close();
+            store.commit("updateStatus","matching");
         })
     }
 }
