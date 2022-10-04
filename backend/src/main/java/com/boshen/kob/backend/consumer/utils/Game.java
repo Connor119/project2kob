@@ -2,8 +2,12 @@ package com.boshen.kob.backend.consumer.utils;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.boshen.kob.backend.consumer.WebSocketServer;
+import com.boshen.kob.backend.mapper.RecordMapper;
+import com.boshen.kob.backend.pojo.Record;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
@@ -30,6 +34,7 @@ public class Game extends Thread{
 //    找一个状态变量来存我们的游戏状态playing 表示正在进行中
     private String status = "playing";
     private String loser = "";
+    public static RecordMapper recordMapper;
 
 //创建地图的时候我们需要的信息有，一个二维数组的空白地图和玩家信息
     public Game(Integer rows, Integer cols, Integer inner_walls_count, Integer idA, Integer idB) {
@@ -40,6 +45,9 @@ public class Game extends Thread{
         this.playerA = new Player(idA,rows-2,1,new ArrayList<>());
         this.playerB = new Player(idB,1,cols-2,new ArrayList<>());
     }
+
+    @Autowired
+    public void setRecordMapper(RecordMapper recordMapper)  { WebSocketServer.recordMapper = recordMapper; }
 
     public Player getPlayerA() {
         return playerA;
@@ -191,6 +199,7 @@ public class Game extends Thread{
 //        event表示当前传播的信息类型是一个事件是一个动作
         resp.put("event", "result");
         resp.put("loser", loser);
+        saveToDatabse();
         sendAllMessage(resp.toJSONString());
     }
 
@@ -249,6 +258,36 @@ public class Game extends Thread{
         }
 
 
+    }
+
+    private String getMapString() {
+        StringBuilder res = new StringBuilder();
+        for(int i = 0; i < rows; i ++) {
+            for(int j = 0; j < cols; j ++) {
+                res.append(g[i][j]);
+            }
+        }
+        return res.toString();
+    }
+
+    private void saveToDatabse() {
+        Record record = new Record(
+                null,
+                playerA.getId(),
+                playerA.getSx(),
+                playerA.getSy(),
+                playerB.getId(),
+                playerB.getSx(),
+                playerB.getSy(),
+//                这里我们的step在表中是一个String,所以需要在player类中写一个String的转换类
+                playerA.getStepsString(),
+                playerB.getStepsString(),
+//                我们也需要将当前的地图也转化为一个String
+                getMapString(),
+                loser,
+                new Date()
+        );
+        WebSocketServer.recordMapper.insert(record);
     }
 
     private boolean nextStep(){
