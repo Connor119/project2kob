@@ -38,6 +38,9 @@ const ModulePk = {
             state.b_sx = game.b_sx;
             state.b_sy = game.b_sy;
         },
+        updateGameObject(state, gameObject) {
+            state.gameObject = gameObject;
+        }
     },
     actions: {},
     modules: {}

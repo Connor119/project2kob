@@ -17,7 +17,10 @@
             const store = useStore();
             onMounted(() => {// 匿名函数的优点: this 不会被重新绑定
             // new GameMap(canvas.value.getContext('2d'), parent.value);// mdn => canvas
-            new GameMap(canvas.value.getContext('2d'), parent.value, store);
+            store.commit(
+                "updateGameObject",
+                new GameMap(canvas.value.getContext('2d'), parent.value, store)// mdn => canvas)
+            );
         });
             return {
                 parent,

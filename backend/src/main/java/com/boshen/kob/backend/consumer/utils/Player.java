@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Player {
-    private int id;
+    private Integer id;
 //    玩家所在的行
     private  Integer sx;
 //    玩家所在的列

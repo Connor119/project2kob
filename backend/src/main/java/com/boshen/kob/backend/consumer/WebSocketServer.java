@@ -22,7 +22,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @ServerEndpoint("/websocket/{token}")  // 注意不要以'/'结尾
 public class WebSocketServer {
 
-    final private static ConcurrentHashMap<Integer, WebSocketServer> users = new ConcurrentHashMap<>();// final 修饰对象时只是引用不可变
+//    由于我们在game类中需要对每一个玩家的信息进行广播，而广播的连接都存入了这个map中，所以这个属性应该是public的而不是private
+    final public static ConcurrentHashMap<Integer, WebSocketServer> users = new ConcurrentHashMap<>();// final 修饰对象时只是引用不可变
 //    开匹配池
     final private static CopyOnWriteArraySet<User> matchpool = new CopyOnWriteArraySet<>();
 
@@ -87,6 +88,14 @@ public class WebSocketServer {
             Game game = new Game(13,14,20,a.getId(),b.getId());
             game.createMap();
 
+
+//            让usera和b一起完成同一个game(这里注意，我们users这个map中存储的是a和b分别对应的WebSocketServer)
+            users.get(a.getId()).game = game;
+            users.get(b.getId()).game = game;
+//            进入一个线程
+            game.start();
+
+
 //生成一个json，这个json包含所有的地图信息和玩家的位置信息，之后将这个信息放入我们后面的两个json中
             JSONObject respGame = new JSONObject();
             respGame.put("a_id",game.getPlayerA().getId());
@@ -121,6 +130,15 @@ public class WebSocketServer {
         matchpool.remove(this.user);
     }
 
+    private void move(int direction) {
+        if(game.getPlayerA().getId().equals(user.getId())) {
+            game.setNextStepA(direction);
+        } else if(game.getPlayerB().getId().equals(user.getId())) {
+            game.setNextStepB(direction);
+        }
+    }
+
+
 
     @OnMessage
     public void onMessage(String message, Session session) {
@@ -137,6 +155,10 @@ public class WebSocketServer {
 //            当是stop的时候也调用相关函数来处理
 
             stopMatching();
+        }else if("move".equals((event))){
+//            在这里当判断事件名称是move的话，就是一个移动指令。
+//            从前端吧这个方向取出来
+            move(data.getInteger("direction"));
         }
     }
 
