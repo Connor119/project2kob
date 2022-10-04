@@ -13,6 +13,7 @@ const ModulePk = {
         b_sx: 0,
         b_sy: 0,
         gameObject: null,
+        loser: "none",
     },
     getters: {},
     mutations: {
@@ -40,6 +41,9 @@ const ModulePk = {
         },
         updateGameObject(state, gameObject) {
             state.gameObject = gameObject;
+        },
+        updateLoser(state, loser) {
+            state.loser = loser;
         }
     },
     actions: {},

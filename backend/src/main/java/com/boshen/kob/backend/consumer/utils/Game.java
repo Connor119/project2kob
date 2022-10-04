@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.boshen.kob.backend.consumer.WebSocketServer;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -136,8 +137,46 @@ public class Game extends Thread{
         /*
         * 判断两个玩家的操作是不是合法
         * */
+        List<Cell> cellsA = playerA.getCells();
+        List<Cell> cellsB = playerB.getCells();
+
+        boolean validA = check_valid(cellsA, cellsB);
+        boolean validB = check_valid(cellsB, cellsA);
+        if(!validA || !validB) {
+            status = "finished";
+
+            if(!validA && !validB) {
+                loser = "all";
+            } else if(!validA) {
+                loser = "A";
+            } else {
+                loser = "B";
+            }
+        }
+
 
     }
+
+    private boolean check_valid(List<Cell> cellsA, List<Cell> cellsB) {
+        int n = cellsA.size();
+        Cell cell = cellsA.get(n - 1);
+        if(g[cell.x][cell.y] == 1) return false;
+
+        for(int i = 0; i < n - 1; i ++) {
+            if(cellsA.get(i).x == cell.x && cellsA.get(i).y == cell.y) {
+                return false;
+            }
+        }
+
+        for(int i = 0; i < n - 1; i ++) {
+            if(cellsB.get(i).x == cell.x && cellsB.get(i).y == cell.y) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private void sendAllMessage(String message) {
         WebSocketServer.users.get(playerA.getId()).sendMessage(message);
         WebSocketServer.users.get(playerB.getId()).sendMessage(message);
@@ -221,10 +260,10 @@ public class Game extends Thread{
         }
 //        等待两名玩家的下一步操作
 //        我们需要等待两名玩家都发出命令，如果哪个玩家5s还没有发出命令，需要对这个玩家返回输了的信息
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
 //            在这个循环里我们让玩家有5秒钟的输入时间，这里可以让线程每5s开启一次，读以西nextStepA和B，看是否有输入
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
 //                等待5s之后我们需要将其加锁（由于我们需要对并发资源进行操作所以这里要加锁）
                 lock.lock();
                 try {

@@ -70,10 +70,10 @@ export class Snake extends AcGameObject {
         for (let i = k; i > 0; i--) {
             this.cells[i] = JSON.parse(JSON.stringify(this.cells[i - 1])); // 必须深层复制
         }
-
-        if (!this.gamemap.check_valid(this.next_cell)) { // 若下一步操作非法，则蛇死亡
-            this.status = "die";
-        }
+        // 后端判断这里删除
+        // if (!this.gamemap.check_valid(this.next_cell)) { // 若下一步操作非法，则蛇死亡
+        //     this.status = "die";
+        // }
     }
 
     update_move() {

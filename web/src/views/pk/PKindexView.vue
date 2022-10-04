@@ -1,6 +1,7 @@
 <template>
     <playGround v-if="$store.state.pk.status === 'playing'"></playGround>
     <MatchGround v-if="$store.state.pk.status === 'matching'"></MatchGround>
+    <ResultBoard v-if="$store.state.pk.loser != 'none'"></ResultBoard>
 </template>
 
 
@@ -9,11 +10,13 @@ import playGround from "../../components/PlayGround.vue"
 import { onMounted, onUnmounted } from 'vue';// 挂载: 打开该组件
 import MatchGround from '@/components/MatchGround.vue'
 import { useStore } from 'vuex'
+import ResultBoard from '@/components/ResultBoard.vue'
 
 export default {
     components:{
         playGround,
         MatchGround,
+        ResultBoard,
     },
     setup() {
         const store = useStore();
@@ -49,6 +52,15 @@ export default {
                     snake1.set_direction(data.b_direction);
                 } else if (data.event === "result") {
                     console.log(data);
+                    const game = store.state.pk.gameObject;
+                    const [snake0, snake1] = game.snakes;
+                    if (data.loser === "all" || data.loser === "A") {
+                        snake0.status = "die";
+                    }
+                    if (data.loser === "all" || data.loser === "B") {
+                        snake1.status = "die";
+                    }
+                    store.commit("updateLoser", data.loser);
                 }
             }
             socket.onclose = () => {
