@@ -221,7 +221,7 @@ public class Game extends Thread{
         }
 //        等待两名玩家的下一步操作
 //        我们需要等待两名玩家都发出命令，如果哪个玩家5s还没有发出命令，需要对这个玩家返回输了的信息
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
 //            在这个循环里我们让玩家有5秒钟的输入时间，这里可以让线程每5s开启一次，读以西nextStepA和B，看是否有输入
             try {
                 Thread.sleep(1000);

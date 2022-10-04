@@ -98,13 +98,13 @@ public class WebSocketServer {
 
 //生成一个json，这个json包含所有的地图信息和玩家的位置信息，之后将这个信息放入我们后面的两个json中
             JSONObject respGame = new JSONObject();
-            respGame.put("a_id",game.getPlayerA().getId());
-            respGame.put("a_sx",game.getPlayerA().getSx());
-            respGame.put("a_sy",game.getPlayerA().getSy());
-            respGame.put("b_id",game.getPlayerB().getId());
-            respGame.put("b_sx",game.getPlayerB().getSx());
-            respGame.put("b_sy",game.getPlayerB().getSy());
-            respGame.put("map",game.getG());
+            respGame.put("a_id", game.getPlayerA().getId());
+            respGame.put("a_sx", game.getPlayerA().getSx());
+            respGame.put("a_sy", game.getPlayerA().getSy());
+            respGame.put("b_id", game.getPlayerB().getId());
+            respGame.put("b_sx", game.getPlayerB().getSx());
+            respGame.put("b_sy", game.getPlayerB().getSy());
+            respGame.put("map", game.getG());
 
             JSONObject respA = new JSONObject();
             respA.put("event", "start-matching");
@@ -155,9 +155,7 @@ public class WebSocketServer {
 //            当是stop的时候也调用相关函数来处理
 
             stopMatching();
-        }else if("move".equals((event))){
-//            在这里当判断事件名称是move的话，就是一个移动指令。
-//            从前端吧这个方向取出来
+        }else if("move".equals(event)) {
             move(data.getInteger("direction"));
         }
     }
