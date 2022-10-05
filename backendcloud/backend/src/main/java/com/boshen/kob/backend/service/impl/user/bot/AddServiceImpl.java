@@ -65,7 +65,7 @@ public class AddServiceImpl implements AddService {
         }
 //做完判断后将所有的信息通过mapper放入数据库中
         Date now = new Date();
-        Bot bot = new Bot(null, user.getId(), title, description, content, 1500, now, now);
+        Bot bot = new Bot(null, user.getId(), title, description, content, now, now);
 
         botMapper.insert(bot);
         map.put("error_message", "success");

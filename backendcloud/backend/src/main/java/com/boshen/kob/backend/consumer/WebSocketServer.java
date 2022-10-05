@@ -10,6 +10,9 @@ import com.boshen.kob.backend.mapper.UserMappper;
 import com.boshen.kob.backend.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
@@ -23,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @ServerEndpoint("/websocket/{token}")  // 注意不要以'/'结尾
 public class WebSocketServer {
     final public static ConcurrentHashMap<Integer, WebSocketServer> users = new ConcurrentHashMap<>();// final 修饰对象时只是引用不可变
-    final private static CopyOnWriteArraySet<User> matchpool = new CopyOnWriteArraySet<>();
+//    final private static CopyOnWriteArraySet<User> matchpool = new CopyOnWriteArraySet<>();
     private User user;
     private Session session = null;
 
@@ -32,6 +35,11 @@ public class WebSocketServer {
 
     private Game game = null;
 
+    private final static String addPlayerUrl = "http://127.0.0.1:3006/player/add/";
+    private final static String removePlayerUrl = "http://127.0.0.1:3006/player/remove/";
+
+    private static RestTemplate restTemplate;
+
     @Autowired
     public void setUserMapper(UserMappper userMapper) {
         WebSocketServer.userMapper = userMapper;
@@ -39,6 +47,11 @@ public class WebSocketServer {
 
     @Autowired
     public void setRecordMapper(RecordMapper recordMapper)  { WebSocketServer.recordMapper = recordMapper; }
+
+    @Autowired
+    public void setRestTemplate(RestTemplate restTemplate){
+        WebSocketServer.restTemplate = restTemplate;
+    }
 
     @OnOpen
     public void onOpen(Session session, @PathParam("token") String token) throws IOException {
@@ -62,47 +75,64 @@ public class WebSocketServer {
         System.out.println("disconnected");
         if(this.user != null) {
             users.remove(this.user.getId());
-            matchpool.remove(this.user);
         }
     }
+
+
+    private void startGame(Integer aId, Integer bId) {
+        User a = userMapper.selectById(aId), b = userMapper.selectById(bId);
+
+        Game game = new Game(13, 14, 20, a.getId(), b.getId());
+        game.createMap();
+        users.get(a.getId()).game = game;
+        users.get(b.getId()).game = game;
+
+        game.start();
+
+        JSONObject respGame = new JSONObject();
+        respGame.put("a_id", game.getPlayerA().getId());
+        respGame.put("a_sx", game.getPlayerA().getSx());
+        respGame.put("a_sy", game.getPlayerA().getSy());
+        respGame.put("b_id", game.getPlayerB().getId());
+        respGame.put("b_sx", game.getPlayerB().getSx());
+        respGame.put("b_sy", game.getPlayerB().getSy());
+        respGame.put("map", game.getG());
+
+        JSONObject respA = new JSONObject();
+        respA.put("event", "start-matching");
+        respA.put("opponent_username", b.getUsername());
+        respA.put("opponent_photo", b.getPhoto());
+        respA.put("game", respGame);
+        users.get(a.getId()).sendMessage(respA.toJSONString());
+
+        JSONObject respB = new JSONObject();
+        respB.put("event", "start-matching");
+        respB.put("opponent_username", a.getUsername());
+        respB.put("opponent_photo", a.getPhoto());
+        respB.put("game", respGame);
+        users.get(b.getId()).sendMessage(respB.toJSONString());
+    }
+
+
+//在这里向matchingServicer发送http请求
+//    向后端发请求需要用到restTemplate
     private void startMatching() {
         System.out.println("start matching");
-        matchpool.add(this.user);
-        while(matchpool.size() >= 2) {
-            Iterator<User> it = matchpool.iterator();
-            User a = it.next(), b = it.next();
-            matchpool.remove(a);
-            matchpool.remove(b);
-            Game game = new Game(13, 14, 20, a.getId(), b.getId());
-            game.createMap();
-            users.get(a.getId()).game = game;
-            users.get(b.getId()).game = game;
-            game.start();
-            JSONObject respGame = new JSONObject();
-            respGame.put("a_id", game.getPlayerA().getId());
-            respGame.put("a_sx", game.getPlayerA().getSx());
-            respGame.put("a_sy", game.getPlayerA().getSy());
-            respGame.put("b_id", game.getPlayerB().getId());
-            respGame.put("b_sx", game.getPlayerB().getSx());
-            respGame.put("b_sy", game.getPlayerB().getSy());
-            respGame.put("map", game.getG());
-            JSONObject respA = new JSONObject();
-            respA.put("event", "start-matching");
-            respA.put("opponent_username", b.getUsername());
-            respA.put("opponent_photo", b.getPhoto());
-            respA.put("game", respGame);
-            users.get(a.getId()).sendMessage(respA.toJSONString());
-            JSONObject respB = new JSONObject();
-            respB.put("event", "start-matching");
-            respB.put("opponent_username", a.getUsername());
-            respB.put("opponent_photo", a.getPhoto());
-            respB.put("game", respGame);
-            users.get(b.getId()).sendMessage(respB.toJSONString());
-        }
+        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+        data.add("user_id", this.user.getId().toString());
+        data.add("rating", this.user.getRating().toString());
+//        restTemplate的作用是发送请求（参数1：url,参数2：请求携带的参数，参数3：返回值的类型）
+        restTemplate.postForObject(addPlayerUrl, data, String.class);
+
     }
+
+
     private void stopMatching() {
         System.out.println("stop macthing");
-        matchpool.remove(this.user);
+        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+        data.add("user_id", this.user.getId().toString());
+        restTemplate.postForObject(removePlayerUrl, data, String.class);
+
     }
     private void move(int direction) {
         if(game.getPlayerA().getId().equals(user.getId())) {

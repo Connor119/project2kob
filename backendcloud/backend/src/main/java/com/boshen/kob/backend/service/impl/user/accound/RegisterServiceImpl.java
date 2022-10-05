@@ -69,7 +69,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         String encodedPassword = passwordEncoder.encode(password);
         String photo = "https://www.behance.net/search/projects/?search=%E6%89%8B%E7%BB%98%E5%A4%B4%E5%83%8F";
-        User user = new User(null, username, encodedPassword, photo);
+        User user = new User(null, username, encodedPassword, photo,1500);
         userMapper.insert(user);
 
 
