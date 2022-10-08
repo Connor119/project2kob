@@ -1,7 +1,8 @@
 <template>
     <div class="matchground">
         <div class="row">
-            <div class="col-6">
+            <!-- <div class="col-6"> -->
+            <div class="col-4">
                 <div class="user-photo">
                     <img :src="$store.state.user.photo" alt="">
                 </div>
@@ -9,7 +10,16 @@
                     {{ $store.state.user.username }}
                 </div>
             </div>
-            <div class="col-6">
+            <!-- <div class="col-6"> -->
+            <div class="col-4">
+                <div class="user-select-bot">
+                    <select v-model="select_bot" class="form-select" aria-label="Default select example">
+                        <option value="-1" selected>Manully</option>
+                        <option v-for="bot in bots" :key="bot.id" :value="bot.id">{{ bot.title }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-4">
                 <div class="user-photo">
                     <img :src="$store.state.pk.opponent_photo" alt="">
                 </div>
@@ -21,7 +31,6 @@
         <div class="col-12" style="text-align: center; padding-top: 13vh;">
             <button type="button" @click="click_match_btn" class="btn btn-warning btn-lg">{{ match_btn_info }}</button>
         </div>
-
     </div>
 </template>
 
@@ -30,15 +39,21 @@ import { ref } from 'vue'
 // import store from '../store';
 import { useStore } from 'vuex'
 // import { computed } from 'vue';
+import $ from 'jquery'
+
 export default {
     setup() {
         const store = useStore();
         let match_btn_info = ref('Start Matching');
+        let bots = ref([]);
+        let select_bot = ref("-1");
+
         const click_match_btn = () => {
             if (match_btn_info.value === "Start Matching") {
                 match_btn_info.value = "Cancel Matching";
                 store.state.pk.socket.send(JSON.stringify({
                     event: "start-matching",
+                    bot_id: select_bot.value,
                 }));
             }
             else {
@@ -48,9 +63,25 @@ export default {
                 }));
             }
         }
+        // 找后端加载bot的list
+        const refresh_bots = () => {
+            $.ajax({
+                url: "http://127.0.0.1:3000/user/bot/getlist/",
+                type: "GET",
+                headers: {
+                    Authorization: "Bearer " + store.state.user.token,
+                },
+                success(resp) {
+                    bots.value = resp;
+                }
+            });
+        }
+        refresh_bots(); // 从云端动态获取 bots
         return {
             match_btn_info,
             click_match_btn,
+            bots,
+            select_bot,
         }
     }
 }
@@ -78,5 +109,12 @@ export default {
     font-weight: 600;
     color: white;
     padding-top: 2vh;
+}
+.user-select-bot {
+    padding-top: 20vh;
+}
+.user-select-bot>select {
+    width: 60%;
+    margin: 0 auto;
 }
 </style>

@@ -5,8 +5,10 @@ package com.boshen.kob.backend.consumer;
 import com.alibaba.fastjson2.JSONObject;
 import com.boshen.kob.backend.consumer.utils.Game;
 import com.boshen.kob.backend.consumer.utils.JwtAuthentication;
+import com.boshen.kob.backend.mapper.BotMapper;
 import com.boshen.kob.backend.mapper.RecordMapper;
 import com.boshen.kob.backend.mapper.UserMappper;
+import com.boshen.kob.backend.pojo.Bot;
 import com.boshen.kob.backend.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,13 +34,15 @@ public class WebSocketServer {
 
     private static UserMappper userMapper;
     public static RecordMapper recordMapper;
+//从数据库中取出来东西
+    private static BotMapper botMapper;
 
     private Game game = null;
 
     private final static String addPlayerUrl = "http://127.0.0.1:3006/player/add/";
     private final static String removePlayerUrl = "http://127.0.0.1:3006/player/remove/";
 
-    private static RestTemplate restTemplate;
+    public static RestTemplate restTemplate;
 
     @Autowired
     public void setUserMapper(UserMappper userMapper) {
@@ -51,6 +55,11 @@ public class WebSocketServer {
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate){
         WebSocketServer.restTemplate = restTemplate;
+    }
+
+    @Autowired
+    public void setBotMapper(BotMapper botMapper) {
+        WebSocketServer.botMapper = botMapper;
     }
 
     @OnOpen
@@ -79,10 +88,18 @@ public class WebSocketServer {
     }
 
 //这里需要在接收到匹配系统传递过来的消息之后进行调用，（需要在StartGameServiceImpl中进行调用所以应该变为public的）
-    public static void startGame(Integer aId, Integer bId) {
+    public static void startGame(Integer aId,Integer aBotId ,Integer bId,Integer bBotId) {
         User a = userMapper.selectById(aId), b = userMapper.selectById(bId);
-
-        Game game = new Game(13, 14, 20, a.getId(), b.getId());
+        Bot botA = botMapper.selectById(aBotId), botB = botMapper.selectById(bBotId);
+        Game game = new Game(
+                13,
+                14,
+                20,
+                a.getId(),
+                botA,
+                b.getId(),
+                botB
+        );
         game.createMap();
         if(users.get(a.getId()) != null)
             users.get(a.getId()).game = game;
@@ -121,11 +138,13 @@ public class WebSocketServer {
 
 //在这里向matchingServicer发送http请求
 //    向后端发请求需要用到restTemplate
-    private void startMatching() {
+    private void startMatching(Integer botId) {
         System.out.println("start matching");
         MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
         data.add("user_id", this.user.getId().toString());
         data.add("rating", this.user.getRating().toString());
+//        增加了一个机器人，所以这里还要增加发一个botid
+        data.add("bot_id",botId.toString());
 //        restTemplate的作用是发送请求（参数1：url,参数2：请求携带的参数，参数3：返回值的类型）
         restTemplate.postForObject(addPlayerUrl, data, String.class);
 
@@ -141,9 +160,14 @@ public class WebSocketServer {
     }
     private void move(int direction) {
         if(game.getPlayerA().getId().equals(user.getId())) {
-            game.setNextStepA(direction);
+//            game.setNextStepA(direction);
+            if(game.getPlayerA().getBotId().equals(-1)) // 人工操作
+                game.setNextStepA(direction);
+
         } else if(game.getPlayerB().getId().equals(user.getId())) {
-            game.setNextStepB(direction);
+//            game.setNextStepB(direction);
+            if(game.getPlayerB().getBotId().equals(-1))
+                game.setNextStepB(direction);
         }
     }
     @OnMessage
@@ -153,7 +177,7 @@ public class WebSocketServer {
         JSONObject data = JSONObject.parseObject(message);
         String event = data.getString("event");
         if ("start-matching".equals(event)) { // revent为空时，.equals 可能报错，所以用"start-matching".equals(event)
-            startMatching();
+            startMatching(data.getInteger("bot_id"));
         } else if("stop-matching".equals(event)) {
             stopMatching();
         } else if("move".equals(event)) {

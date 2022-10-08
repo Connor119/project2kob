@@ -3,8 +3,11 @@ package com.boshen.kob.backend.consumer.utils;
 import com.alibaba.fastjson2.JSONObject;
 import com.boshen.kob.backend.consumer.WebSocketServer;
 import com.boshen.kob.backend.mapper.RecordMapper;
+import com.boshen.kob.backend.pojo.Bot;
 import com.boshen.kob.backend.pojo.Record;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,15 +38,36 @@ public class Game extends Thread{
     private String status = "playing";
     private String loser = "";
     public static RecordMapper recordMapper;
+    private final static String addBotUrl = "http://127.0.0.1:3007/bot/add/";
 
 //创建地图的时候我们需要的信息有，一个二维数组的空白地图和玩家信息
-    public Game(Integer rows, Integer cols, Integer inner_walls_count, Integer idA, Integer idB) {
+    public Game(
+            Integer rows,
+            Integer cols,
+            Integer inner_walls_count,
+            Integer idA,
+            Bot botA,
+            Integer idB,
+            Bot botB
+    ) {
         this.rows = rows;
         this.cols = cols;
         this.inner_walls_count = inner_walls_count;
         this.g = new int[rows][cols];
-        this.playerA = new Player(idA,rows-2,1,new ArrayList<>());
-        this.playerB = new Player(idB,1,cols-2,new ArrayList<>());
+
+        Integer botIdA = -1, botIdB = -1;
+        String botCodeA = "", botCodeB = "";
+        if(botA != null) {
+            botIdA = botA.getId();
+            botCodeA = botA.getContent();
+        }
+        if(botB != null) {
+            botIdB = botB.getId();
+            botCodeB = botB.getContent();
+        }
+
+        this.playerA = new Player(idA, botIdA, botCodeA, rows - 2, 1, new ArrayList<>());
+        this.playerB = new Player(idB, botIdB, botCodeB, 1, cols - 2, new ArrayList<>());
     }
 
     @Autowired
@@ -292,6 +316,34 @@ public class Game extends Thread{
         WebSocketServer.recordMapper.insert(record);
     }
 
+    private String getInput(Player player) { // 将当前的局面信息编码成字符串
+        Player me, you;
+        if(playerA.getId().equals(player.getId())) {
+            me = playerA;
+            you = playerB;
+        } else {
+            me = playerB;
+            you = playerA;
+        }
+        // 信息以 # 隔断
+        return getMapString() + "#" +
+                me.getSx() + "#" +
+                me.getSy() + "#(" +
+                me.getStepsString() + ")#" +
+                you.getSx() + "#" +
+                you.getSy() + "#(" +
+                you.getStepsString() + ")";
+    }
+
+    private void sendBotCode(Player player) {
+        if(player.getBotId().equals(-1)) return; // 不需要执行代码
+        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+        data.add("user_id", player.getId().toString());
+        data.add("bot_code", player.getBotCode());
+        data.add("input", getInput(player));
+        WebSocketServer.restTemplate.postForObject(addBotUrl, data, String.class);
+    }
+
     private boolean nextStep(){
         try {
 //            这里是因为前端每秒走5个格子，如果两个人都输入比较快，那么之后的动作就会覆盖掉之前的动作，所以进来的时候先要停200ms
@@ -299,6 +351,9 @@ public class Game extends Thread{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        sendBotCode(playerA);
+        sendBotCode(playerB);
 //        等待两名玩家的下一步操作
 //        我们需要等待两名玩家都发出命令，如果哪个玩家5s还没有发出命令，需要对这个玩家返回输了的信息
         for (int i = 0; i < 500; i++) {

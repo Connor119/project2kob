@@ -13,6 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 public class Player {
     private Integer id;
+    private Integer botId;//-1表示人工操作，其它的bot表示bot
+    private String botCode;
 //    玩家所在的行
     private  Integer sx;
 //    玩家所在的列
