@@ -37,7 +37,7 @@ public class WebSocketServer {
 //从数据库中取出来东西
     private static BotMapper botMapper;
 
-    private Game game = null;
+    public Game game = null;
 
     private final static String addPlayerUrl = "http://127.0.0.1:3006/player/add/";
     private final static String removePlayerUrl = "http://127.0.0.1:3006/player/remove/";
@@ -163,7 +163,6 @@ public class WebSocketServer {
 //            game.setNextStepA(direction);
             if(game.getPlayerA().getBotId().equals(-1)) // 人工操作
                 game.setNextStepA(direction);
-
         } else if(game.getPlayerB().getId().equals(user.getId())) {
 //            game.setNextStepB(direction);
             if(game.getPlayerB().getBotId().equals(-1))
@@ -184,6 +183,7 @@ public class WebSocketServer {
             move(data.getInteger("direction"));
         }
     }
+
     @OnError
     public void onError(Session session, Throwable error) {
         error.printStackTrace();

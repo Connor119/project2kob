@@ -2,12 +2,26 @@ package com.kob.botrunningsystem.service.impl.utils;
 
 import com.kob.botrunningsystem.utils.BotInterface;
 import org.joor.Reflect;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
 
 import java.util.UUID;
 
+@Component
 public class Consumer extends Thread { // 写成一个线程，时间太长则会自动断掉
     private Bot bot;
 
+    private static RestTemplate restTemplate;
+    private final static String receiveBotMoveUrl = "http://127.0.0.1:3000/pk/receive/bot/move/";
+
+    @Autowired
+    public void setRestTemplate(RestTemplate restTemplate) {
+        Consumer.restTemplate = restTemplate;
+    }
     public void startTimeout(long timeout, Bot bot) {
         this.bot = bot;
         this.start();
@@ -22,7 +36,7 @@ public class Consumer extends Thread { // 写成一个线程，时间太长则�
     }
 
     private String addUid(String code, String uid) { // 在 code 中的 Bot 类名加上 uid
-        int k = code.indexOf(" implements com.kob.botrunningsystem.utils.BotInterface");
+        int k = code.indexOf(" implements BotInterface");
         return code.substring(0, k) + uid + code.substring(k);
     }
 
@@ -38,5 +52,9 @@ public class Consumer extends Thread { // 写成一个线程，时间太长则�
         Integer direction = botInterface.nextMove(bot.getInput());
 
         System.out.println("move-direction" + bot.getUserId() + " " + direction );
+        MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
+        data.add("user_id", bot.getUserId().toString());
+        data.add("direction", direction.toString());
+        restTemplate.postForObject(receiveBotMoveUrl, data, String.class);
     }
 }
