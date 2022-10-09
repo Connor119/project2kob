@@ -1,4 +1,4 @@
-package com.kob.botruningsystem.config;
+package com.kob.botrunningsystem.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

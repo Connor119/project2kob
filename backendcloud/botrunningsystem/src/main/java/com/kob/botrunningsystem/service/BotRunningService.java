@@ -1,4 +1,4 @@
-package com.kob.botruningsystem.service;
+package com.kob.botrunningsystem.service;
 
 public interface BotRunningService {
 //    增加一个bot的方法

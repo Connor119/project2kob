@@ -1,6 +1,6 @@
-package com.kob.botruningsystem.controller;
+package com.kob.botrunningsystem.controller;
 
-import com.kob.botruningsystem.service.BotRunningService;
+import com.kob.botrunningsystem.service.BotRunningService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
