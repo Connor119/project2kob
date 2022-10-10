@@ -5,6 +5,7 @@ import com.boshen.kob.backend.consumer.WebSocketServer;
 import com.boshen.kob.backend.mapper.RecordMapper;
 import com.boshen.kob.backend.pojo.Bot;
 import com.boshen.kob.backend.pojo.Record;
+import com.boshen.kob.backend.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -296,7 +297,32 @@ public class Game extends Thread{
         return res.toString();
     }
 
+//    更新玩家的积分
+    private void updateUserRating(Player player, Integer rating) {
+        User user = WebSocketServer.userMapper.selectById(player.getId());
+        user.setRating(rating);
+        WebSocketServer.userMapper.updateById(user);
+    }
+
     private void saveToDatabse() {
+        /*
+        * 更新操作包含了记录当前对局的情况以及更新用户的积分
+        * */
+        Integer ratingA = WebSocketServer.userMapper.selectById(playerA.getId()).getRating();
+        Integer ratingB = WebSocketServer.userMapper.selectById(playerB.getId()).getRating();
+
+        if("A".equals(loser)) {
+            ratingA += 5;
+            ratingB -= 2;
+        } else if("B".equals(loser)) {
+            ratingA -= 2;
+            ratingB += 5;
+        }
+
+        updateUserRating(playerA, ratingA);
+        updateUserRating(playerB, ratingB);
+
+
         Record record = new Record(
                 null,
                 playerA.getId(),

@@ -32,7 +32,7 @@ public class WebSocketServer {
     private User user;
     private Session session = null;
 
-    private static UserMappper userMapper;
+    public static UserMappper userMapper;
     public static RecordMapper recordMapper;
 //从数据库中取出来东西
     private static BotMapper botMapper;
