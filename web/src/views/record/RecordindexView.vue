@@ -1,6 +1,6 @@
 <template>
-  <ContendField>
-    <table class="table table-hover" style="text-align: center">
+    <ContentField>
+        <table class="table table-hover" style="text-align: center">
             <thead>
                 <tr>
                     <th>A</th>
@@ -29,54 +29,94 @@
                         {{ record.record.createtime }}
                     </td>
                     <td>
-                      <button @click="open_record_content(record.record.id)" type="button"
+                        <button @click="open_record_content(record.record.id)" type="button"
                             class="btn btn-secondary">View</button>
                     </td>
                 </tr>
             </tbody>
         </table>
-  </ContendField>
+
+        <nav aria-label="...">
+            <ul class="pagination" style="float:right">
+                <li class="page-item" @click="click_page(-2)">
+                    <a class="page-link">Previous</a>
+                </li>
+                <li :class="'page-item ' + page.is_active" v-for="page in pages" :key="page.number"
+                    @click="click_page(page.number)">
+                    <a class="page-link">{{ page.number }}</a>
+                </li>
+                <li :class="page-item" @click="click_page(-1)">
+                    <a class="page-link">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </ContentField>
 </template>
 
 <script>
-import ContendField from "../../components/ContendField.vue"
+import ContentField from '../../components/ContendField.vue'
 import { useStore } from 'vuex'
 import { ref } from 'vue'
 import $ from 'jquery'
 import router from '../../router/index'
 export default {
-  components: {
-    ContendField,
-  },
-  setup() {
-      const store = useStore();
-      let records = ref([]);
-      let total_records = 0;
-      let current_page = 1;
-      console.log(total_records);
-      const pull_page = (page_num) => {
-          current_page = page_num;
-          $.ajax({
-              url: "http://127.0.0.1:3000/record/getlist/",
-              data: {
-                  page_num,
-              },
-              type: "GET",
-              headers: {
-                  Authorization: "Bearer " + store.state.user.token,
-              },
-              success(resp) {
-                // console.log(resp)
-                records.value = resp.records;
-                total_records = resp.records_count;
-              },
-              error(resp) {
-                  console.log(resp);
-              }
-          });
-      }
-      pull_page(current_page);
-      const stringTo2D = (map) => {
+    components: {
+        ContentField,
+    },
+    setup() {
+        const store = useStore();
+        let records = ref([]);
+        let total_records = 0;
+        let current_page = 1;
+        let pages = ref([]);
+        const click_page = (page_num) => {
+            console.log("page num is: " +page_num)
+            if (page_num === -2) page_num = current_page - 1;
+            else if (page_num === -1) page_num = current_page + 1;
+            let max_pages = parseInt(Math.ceil(total_records / 10));
+            if (page_num >= 1 && page_num <= max_pages) {
+                pull_page(page_num);
+            }
+        }
+        console.log(total_records);
+        const update_pages = () => {
+            let max_pages = parseInt(Math.ceil(total_records / 10));
+            let new_pages = [];
+            for (let i = current_page - 2; i <= current_page + 2; i++) { // 一共显示五页
+                if (i >= 1 && i <= max_pages) {
+                    new_pages.push({
+                        number: i,
+                        is_active: i === current_page ? "active" : "",
+                    });
+                }
+            }
+            // pull_page(current_page);
+            pages.value = new_pages;
+        }
+        const pull_page = (page_num) => {
+            current_page = page_num;
+            $.ajax({
+                url: "http://127.0.0.1:3000/record/getlist/",
+                data: {
+                    page_num,
+                },
+                type: "GET",
+                headers: {
+                    Authorization: "Bearer " + store.state.user.token,
+                },
+                success(resp) {
+                    // console.log(resp);
+                    records.value = resp.records;
+                    total_records = resp.records_count;
+                    update_pages();
+                },
+                error(resp) {
+                    console.log(resp);
+                }
+            });
+        }
+        pull_page(current_page);
+        const stringTo2D = (map) => {
             let g = [];
             for (let i = 0, k = 0; i < 13; i++) {
                 let line = [];
@@ -116,17 +156,16 @@ export default {
                 }
             }
         }
-      return {
-          records,
-          open_record_content,
-      }
-  }
+        return {
+            records,
+            open_record_content,
+            pages,
+            click_page,
+        }
+    }
 }
 </script>
-
-
 <style scoped>
-
 .record-user-photo {
     width: 4vh;
     border-radius: 50%;

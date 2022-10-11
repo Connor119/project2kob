@@ -5,10 +5,10 @@ import RecordIndexView from '../views/record/RecordindexView.vue'
 import RanklistIndexView from '../views/ranklist/RanklistindexView.vue'
 import UserBotIndexView from '../views/user/bot/UserBotindexView.vue'
 import NotFound from '../views/error/NotFound.vue'
-import RecordContentView from '../views/record/RecordContentView'
 import UserAccountLoginView from '../views/user/account/UserAccountLoginView'
 import UserAccountRegisterView from '../views/user/account/UserAccountRegisterView'
 import store from '../store/index'
+import RecordContentView from '../views/record/RecordContentView'
 
 const routes = [{
         path: '/',
@@ -53,6 +53,13 @@ const routes = [{
         meta: {
             requestAuth: false,
         }
+    }, {
+        path: "/record/:recordId/",
+        name: "record_content",
+        component: RecordContentView,
+        meta: {
+            requestAuth: true,
+        }
     },
     {
         path: "/user/account/register/",
@@ -60,13 +67,6 @@ const routes = [{
         component: UserAccountRegisterView,
         meta: {
             requestAuth: false,
-        }
-    }, {
-        path: "/record/:recordId/",
-        name: "record_content",
-        component: RecordContentView,
-        meta: {
-            requestAuth: true,
         }
     }, {
         path: "/404/",
