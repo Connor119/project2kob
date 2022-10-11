@@ -44,6 +44,14 @@ public class GetRecordListServiceImpl implements GetRecordListService {
             item.put("a_username", userA.getUsername());
             item.put("b_photo", userB.getPhoto());
             item.put("b_username", userB.getUsername());
+//            如果某些需要展示的结果并没有在数据库中存储，前端需要展示，后端可以直接做处理，返回结果给前端即可
+            String result = "draw";
+            if("A".equals(record.getLoser())){
+                result = "B win";
+            }else if("B".equals(record.getLoser())){
+                result = "A win";
+            }
+            item.put("result",result);
             item.put("record", record);
             items.add(item);
         }
