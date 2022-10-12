@@ -177,7 +177,6 @@ public class Game extends Thread{
         boolean validB = check_valid(cellsB, cellsA);
         if(!validA || !validB) {
             status = "finished";
-
             if(!validA && !validB) {
                 loser = "all";
             } else if(!validA) {
@@ -186,8 +185,6 @@ public class Game extends Thread{
                 loser = "B";
             }
         }
-
-
     }
 
     private boolean check_valid(List<Cell> cellsA, List<Cell> cellsB) {
@@ -200,13 +197,11 @@ public class Game extends Thread{
                 return false;
             }
         }
-
         for(int i = 0; i < n - 1; i ++) {
             if(cellsB.get(i).x == cell.x && cellsB.get(i).y == cell.y) {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -249,42 +244,34 @@ public class Game extends Thread{
 //    当我们启动一个线程之后需要考虑这个线程接下来需要进行什么样的操作：等待下一步的操作
     @Override
     public void run() {
-//一个线程也就是一个游戏，这个游戏不会超过1000步就结束，所以我们在这里写一个循环获取1000次下一步操作
-        for (int i = 0; i < 1000; i++) {
-            if(nextStep()){
+        for(int i = 0; i < 1000; i ++) {
+            if(nextStep()) { // 是否获取两条蛇的下一步操作
                 judge();
-                if(status.equals("playing")){
-//                    这说明我们经过超时校验和步骤合法性校验后玩家都符合要求游戏需要继续
-//                    这时候需要将两名玩家的输入分别广播给两个人，这是因为对战的时候c1知道自己的操作而不知道对手的操作，这就需要服务器将对手的操作返回给c1，之后同步页面
+                if(status.equals("playing")) {
                     sendMove();
-                }else{
+                } else {
                     sendResult();
-//                    结束游戏记得加入break
+                    break;
                 }
-            }else{
-//                如果没有获取到下一步动作，那么游戏就结束了，要更改游戏的状态
+            }
+            else {
                 status = "finished";
-//                在这里也需要加锁（如果我们使用最普通的课重入锁的话那么我们需要对有并发问题的变量的读写操作都加锁）
                 lock.lock();
                 try {
-                    if(nextStepA == null && nextStepB == null){
-    //                    如果两个蛇都死了，都没有获取到下一步操作，这个时候就是平局
+                    if(nextStepA == null && nextStepB == null) {
                         loser = "all";
-                    }else if(nextStepA == null){
+                    } else if(nextStepA == null) {
                         loser = "A";
-                    }else{
+                    } else {
                         loser = "B";
                     }
                 } finally {
                     lock.unlock();
                 }
-//                当上面的逻辑都跑完了，我们的游戏就也就结束了，结束之前需要给两个玩家发消息
                 sendResult();
                 break;
             }
         }
-
-
     }
 
     private String getMapString() {

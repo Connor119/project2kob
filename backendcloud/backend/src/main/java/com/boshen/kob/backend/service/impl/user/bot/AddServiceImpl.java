@@ -1,5 +1,6 @@
 package com.boshen.kob.backend.service.impl.user.bot;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boshen.kob.backend.mapper.BotMapper;
 import com.boshen.kob.backend.pojo.Bot;
 import com.boshen.kob.backend.pojo.User;
@@ -63,6 +64,15 @@ public class AddServiceImpl implements AddService {
             map.put("error_message", "Code can't be longer than 10000");
             return map;
         }
+
+        QueryWrapper<Bot> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", user.getId());
+        if(botMapper.selectCount(queryWrapper) >= 10) {
+            map.put("error_message", "Bot number can't be greater than 10");
+            return map;
+        }
+
+
 //做完判断后将所有的信息通过mapper放入数据库中
         Date now = new Date();
         Bot bot = new Bot(null, user.getId(), title, description, content, now, now);
